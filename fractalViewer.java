@@ -11,7 +11,7 @@ public class fractalViewer {
       FractalPanel fPanel = new FractalPanel();
       viewerFrame.add(fPanel,BorderLayout.CENTER);
       
-      viewerFrame.setSize(500,500);
+      viewerFrame.setSize(1000,1000);
       viewerFrame.setVisible(true);
    
    }
