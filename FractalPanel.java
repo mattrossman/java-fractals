@@ -16,9 +16,9 @@ public class FractalPanel extends JPanel implements ActionListener{
    private Complex origin = new Complex(-2,-1.5);
    private boolean isCalculated = false;
    
-   int pixSize = 4;
+   int pixSize = 64;
    int maxIterations = 255;
-   int fps = 20;
+   int fps = 60;
    
    TreeMap<Pixel,Integer> fracTable = new TreeMap<Pixel,Integer>();
    
@@ -48,9 +48,19 @@ public class FractalPanel extends JPanel implements ActionListener{
    }
    
    private void refineMandlebrot(){
-      pixSize/=2;
+      pixSize/=2; //splits pixel into quadrants
       Complex thisPoint;
-      
+      for (int x=0; x<getWidth(); x+=pixSize){
+         for (int y=0; y<getHeight(); y+=pixSize){
+         
+            //only add to the table the 3 quadrants not yet calculated
+            if (x%(pixSize*2)!=0 || (y%(pixSize*2)!=0)){
+               thisPoint = new Complex(origin.getX()+(double)x/getWidth()*graphWidth,
+                                       origin.getY()+(double)y/getHeight()*graphHeight);
+               fracTable.put(new Pixel(x,y),thisPoint.iterateMandlebrot(maxIterations));
+            }   
+         }   
+      }
    }
    
    private void oldDrawFractal(Graphics g){
@@ -96,12 +106,10 @@ public class FractalPanel extends JPanel implements ActionListener{
    }
    
    public void actionPerformed(ActionEvent e){
-      /*
       if (pixSize>1){
-         pixSize/=2;
+         refineMandlebrot();
          repaint();
       }
-      */
    }
 
 }
