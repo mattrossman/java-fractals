@@ -14,36 +14,76 @@ public class FractalPanel extends JPanel implements ActionListener{
    private double graphWidth = 3;
    private double graphHeight = graphWidth;
    private Complex origin = new Complex(-2,-1.5);
-   private TreeMap<Pixel,Integer> fracTable = new TreeMap<Pixel,Integer>();
+   private boolean isCalculated = false;
    
-   int pixSize = 128;
+   int pixSize = 4;
    int maxIterations = 255;
    int fps = 20;
+   
+   TreeMap<Pixel,Integer> fracTable = new TreeMap<Pixel,Integer>();
    
    public FractalPanel() {
       Timer timer = new Timer(1000/fps,this);
       timer.start();
    }
    
+   
    public void paintComponent(Graphics g){
-      super.paintComponent(g);
-      drawFractal(g);
+      super.paintComponent(g); //render first so calculations can access height and width values
+      if (isCalculated==false)
+         calculateMandlebrot();
+      drawFractal(g,pixSize);
    }
    
-   private void drawFractal(Graphics g){
+   private void calculateMandlebrot(){
       Complex thisPoint;
-      for (int x=pixSize/2; x<getWidth(); x+=pixSize){
-         for (int y=pixSize/2; y<getHeight(); y+=pixSize){
+      for (int x=0; x<getWidth(); x+=pixSize){
+         for (int y=0; y<getHeight(); y+=pixSize){
+            thisPoint = new Complex(origin.getX()+(double)x/getWidth()*graphWidth,
+                                    origin.getY()+(double)y/getHeight()*graphHeight);
+            fracTable.put(new Pixel(x,y),thisPoint.iterateMandlebrot(maxIterations));
+         }   
+      }
+      isCalculated = true; 
+   }
+   
+   private void refineMandlebrot(){
+      pixSize/=2;
+      Complex thisPoint;
+      
+   }
+   
+   private void oldDrawFractal(Graphics g){
+      Complex thisPoint;
+      for (int x=0; x<getWidth(); x+=pixSize){
+         for (int y=0; y<getHeight(); y+=pixSize){
             thisPoint = new Complex(origin.getX()+(double)x/getWidth()*graphWidth,
                                     origin.getY()+(double)y/getHeight()*graphHeight);
             
             setFractalColor(g,thisPoint);
             
-            g.fillRect(x-pixSize/2,y-pixSize/2,pixSize,pixSize);      
+            g.fillRect(x,y,pixSize,pixSize);      
          
          }
       
       }
+   }
+   
+   private void drawFractal(Graphics g, int pSize){
+   
+      for (int x=0; x<getWidth(); x+=pixSize){
+         for (int y=0; y<getHeight(); y+=pixSize){
+            if (fracTable.containsKey(new Pixel(x,y))) {
+               int iterationsHere = fracTable.get(new Pixel(x,y));
+               if (iterationsHere<=maxIterations)
+                  g.setColor(new Color(iterationsHere,0,0));
+               else
+                  g.setColor(Color.BLACK);
+                  
+               g.fillRect(x,y,pSize,pSize);
+            }   
+         }
+      }   
    }
    
    private void setFractalColor(Graphics g, Complex c) {
@@ -56,10 +96,12 @@ public class FractalPanel extends JPanel implements ActionListener{
    }
    
    public void actionPerformed(ActionEvent e){
+      /*
       if (pixSize>1){
          pixSize/=2;
          repaint();
       }
+      */
    }
 
 }
